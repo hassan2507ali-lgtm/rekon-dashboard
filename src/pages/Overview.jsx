@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Calendar, Plus, Layers, CheckCircle2, RefreshCcw, AlertTriangle, ArrowRight, ArrowUpRight, User, Search, ChevronDown, ChevronRight, X } from 'lucide-react';
-import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 // --- DATA DUMMY GRAFIK AREA (TREND) ---
 const dataToday = [{ name: '08:00', matched: 1200 }, { name: '10:00', matched: 3500 }, { name: '12:00', matched: 6800 }, { name: '14:00', matched: 8900 }, { name: '16:00', matched: 11200 }, { name: '18:00', matched: 12106 }];
@@ -14,19 +14,27 @@ const modul7Days = [{ name: 'ECT H0', aktif: 85, tidakAktif: 20 }, { name: 'ECO 
 const modul30Days = [{ name: 'ECT H0', aktif: 320, tidakAktif: 50 }, { name: 'ECO H0', aktif: 150, tidakAktif: 100 }, { name: 'ECO H1', aktif: 480, tidakAktif: 110 }];
 const modulCustom = [{ name: 'ECT H0', aktif: 1200, tidakAktif: 150 }, { name: 'ECO H0', aktif: 800, tidakAktif: 300 }, { name: 'ECO H1', aktif: 1800, tidakAktif: 400 }];
 
-// --- DATA DUMMY GRAFIK PIE (OUTCOMES) ---
-const pieToday = [{ name: 'Matched', value: 12106, color: '#4f46e5' }, { name: 'Unmatched', value: 252, color: '#f59e0b' }, { name: 'Exception', value: 122, color: '#ef4444' }];
-const pie7Days = [{ name: 'Matched', value: 85420, color: '#4f46e5' }, { name: 'Unmatched', value: 1450, color: '#f59e0b' }, { name: 'Exception', value: 410, color: '#ef4444' }];
-const pie30Days = [{ name: 'Matched', value: 342100, color: '#4f46e5' }, { name: 'Unmatched', value: 4500, color: '#f59e0b' }, { name: 'Exception', value: 1200, color: '#ef4444' }];
-const pieCustom = [{ name: 'Matched', value: 1250000, color: '#4f46e5' }, { name: 'Unmatched', value: 15000, color: '#f59e0b' }, { name: 'Exception', value: 4000, color: '#ef4444' }];
+// --- DATA DUMMY ALERT TERBARU (Sesuai Gambar) ---
+const alertsData = [
+  { id: 1, title: 'Modul 07 · ECO H1', desc: 'Data belum masuk, lewat cut-off 09:00', type: 'danger' },
+  { id: 2, title: 'Modul 15 · CTO H1', desc: 'Proses rekon > 30 menit dari SLA', type: 'warning' },
+  { id: 3, title: 'Modul 02 · ECO H0', desc: 'Modul tidak aktif sejak 07 Okt', type: 'danger' },
+  { id: 4, title: 'Modul 11 · ECO H1', desc: 'Data terlambat, sudah selesai 10:12', type: 'success' },
+];
 
-// --- DATA TABEL STATIS ---
+// --- DATA DUMMY BATCH LAMA DIPERBANYAK ---
 const tableData = [
-  { id: 'RCN-20261012-001', date: '12 Oct 2026', tx: '12,480', rate: '97.00%', status: 'Review required', time: '09:42' },
-  { id: 'RCN-20261011-001', date: '11 Oct 2026', tx: '11,240', rate: '97.33%', status: 'Review required', time: '09:38' },
+  { id: 'RCN-20261012-004', date: '12 Oct 2026', tx: '12,480', rate: '97.00%', status: 'Review required', time: '09:42' },
+  { id: 'RCN-20261012-003', date: '12 Oct 2026', tx: '8,120', rate: '99.10%', status: 'Reconciled', time: '08:15' },
+  { id: 'RCN-20261012-002', date: '12 Oct 2026', tx: '4,050', rate: '95.50%', status: 'Review required', time: '07:30' },
+  { id: 'RCN-20261012-001', date: '12 Oct 2026', tx: '9,800', rate: '100.00%', status: 'Reconciled', time: '06:00' },
+  { id: 'RCN-20261011-002', date: '11 Oct 2026', tx: '11,240', rate: '97.33%', status: 'Review required', time: '09:38' },
+  { id: 'RCN-20261011-001', date: '11 Oct 2026', tx: '15,300', rate: '100.00%', status: 'Reconciled', time: '06:10' },
   { id: 'RCN-20261010-001', date: '10 Oct 2026', tx: '10,600', rate: '100.00%', status: 'Reconciled', time: '09:40' },
   { id: 'RCN-20261009-001', date: '09 Oct 2026', tx: '11,300', rate: '100.00%', status: 'Reconciled', time: '09:36' },
 ];
+
+// --- DATA DUMMY TABEL STATUS MODUL DIPERBANYAK ---
 const modulTableData = [
   { no: 1, modul: 'Modul 03', server: 'ECO H1', status: 'Aktif', sla: 'Tepat waktu', match: '18.240', unmatch: '820' },
   { no: 2, modul: 'Modul 11', server: 'ECO H1', status: 'Aktif', sla: 'Terlambat', match: '15.110', unmatch: '610' },
@@ -36,6 +44,13 @@ const modulTableData = [
   { no: 6, modul: 'Modul 09', server: 'ECO H0', status: 'Aktif', sla: 'Tepat waktu', match: '8.310', unmatch: '95' },
   { no: 7, modul: 'Modul 18', server: 'CTO H1', status: 'Aktif', sla: 'Tepat waktu', match: '7.640', unmatch: '40' },
   { no: 8, modul: 'Modul 02', server: 'ECO H0', status: 'Tidak aktif', sla: '-', match: '-', unmatch: '-' },
+  { no: 9, modul: 'Modul 22', server: 'ECO H1', status: 'Aktif', sla: 'Tepat waktu', match: '22.100', unmatch: '10' },
+  { no: 10, modul: 'Modul 14', server: 'CTO H0', status: 'Tidak aktif', sla: '-', match: '-', unmatch: '-' },
+  { no: 11, modul: 'Modul 05', server: 'ECO H0', status: 'Aktif', sla: 'Terlambat', match: '5.400', unmatch: '300' },
+  { no: 12, modul: 'Modul 08', server: 'CTO H1', status: 'Aktif', sla: 'Tepat waktu', match: '19.550', unmatch: '22' },
+  { no: 13, modul: 'Modul 19', server: 'ECO H1', status: 'Aktif', sla: 'Tepat waktu', match: '14.200', unmatch: '180' },
+  { no: 14, modul: 'Modul 01', server: 'ECO H0', status: 'Tidak aktif', sla: '-', match: '-', unmatch: '-' },
+  { no: 15, modul: 'Modul 25', server: 'CTO H1', status: 'Aktif', sla: 'Terlambat', match: '6.700', unmatch: '115' },
 ];
 
 export default function Overview() {
@@ -49,35 +64,22 @@ export default function Overview() {
   const [serverFilter, setServerFilter] = useState('Semua');
   const [statusFilter, setStatusFilter] = useState('Semua');
 
-  // --- LOGIKA FILTER GRAFIK DINAMIS (SEMUA GRAFIK) ---
   let currentChartData = dataToday;
   let currentModulData = modulToday;
-  let currentPieData = pieToday;
-  let currentPiePercentage = '97%';
   let totalModulRecords = '1,225';
-  let totalOutcomeRecords = '12,480';
 
   if (activeFilter === '7 days') {
     currentChartData = data7Days;
     currentModulData = modul7Days;
-    currentPieData = pie7Days;
-    currentPiePercentage = '98%';
     totalModulRecords = '8,540';
-    totalOutcomeRecords = '87,280';
   } else if (activeFilter === '30 days') {
     currentChartData = data30Days;
     currentModulData = modul30Days;
-    currentPieData = pie30Days;
-    currentPiePercentage = '98.3%';
     totalModulRecords = '34,210';
-    totalOutcomeRecords = '347,800';
   } else if (activeFilter === 'Custom') {
     currentChartData = dataCustomRange;
     currentModulData = modulCustom;
-    currentPieData = pieCustom;
-    currentPiePercentage = '98.5%';
     totalModulRecords = '120,400';
-    totalOutcomeRecords = '1,269,000';
   }
 
   const handleApplyDate = () => {
@@ -177,7 +179,7 @@ export default function Overview() {
         </div>
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
           <div className="flex justify-between items-start mb-4"><span className="text-sm font-medium text-slate-600">Match rate</span><div className="p-1.5 bg-emerald-50 rounded text-emerald-600"><CheckCircle2 className="w-4 h-4" /></div></div>
-          <div><div className="flex items-end gap-3 mb-1"><h3 className="text-3xl font-bold text-slate-900">{currentPiePercentage}</h3></div><p className="text-xs text-indigo-600 underline cursor-pointer">View match breakdown</p></div>
+          <div><div className="flex items-end gap-3 mb-1"><h3 className="text-3xl font-bold text-slate-900">97.00%</h3></div><p className="text-xs text-indigo-600 underline cursor-pointer">View match breakdown</p></div>
         </div>
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
           <div className="flex justify-between items-start mb-4"><span className="text-sm font-medium text-slate-600">Unmatched records</span><div className="p-1.5 bg-amber-50 rounded text-amber-600"><RefreshCcw className="w-4 h-4" /></div></div>
@@ -189,8 +191,9 @@ export default function Overview() {
         </div>
       </div>
 
-      {/* Grafik */}
+      {/* --- GRID 3 KOLOM: Trend | Moduls | ALERT TERBARU (Baru) --- */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        
         {/* Trend Area Chart */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex justify-between items-center mb-6">
@@ -227,49 +230,55 @@ export default function Overview() {
           </div>
         </div>
         
-        {/* Outcomes Pie Chart */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-          <h3 className="font-semibold text-slate-900 capitalize">{activeFilter === 'Today' ? "Today's" : activeFilter} Outcomes</h3>
-          <p className="text-xs text-slate-500 mb-2">{totalOutcomeRecords} records • Card payments</p>
-          <div className="flex-1 flex flex-col justify-center relative">
-            <div className="h-32">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart key={`pie-${activeFilter}`}>
-                  <Pie data={currentPieData} innerRadius={40} outerRadius={55} paddingAngle={2} dataKey="value" stroke="none">
-                    {currentPieData.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.color} />))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
-              <span className="text-xl font-bold text-slate-900">{currentPiePercentage}</span>
+        {/* --- ALERT TERBARU WIDGET (Menggantikan Pie Chart) --- */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col h-[275px]">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="font-bold text-slate-800 text-lg">Alert terbaru</h3>
+            <div className="w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center text-sm font-bold shadow-sm">
+              3
             </div>
           </div>
+          
+          {/* Daftar Alert (Scrollable) */}
+          <div className="space-y-5 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            {alertsData.map((alert) => (
+              <div key={alert.id} className="flex gap-3 items-start">
+                <div className={`w-3.5 h-3.5 rounded-full mt-1 shrink-0 ${
+                  alert.type === 'danger' ? 'bg-red-500' :
+                  alert.type === 'warning' ? 'bg-amber-500' : 'bg-emerald-500'
+                }`}></div>
+                <div>
+                  <p className="text-sm font-bold text-slate-800 leading-tight">{alert.title}</p>
+                  <p className="text-xs text-slate-500 mt-1 leading-snug">{alert.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
+
       </div>
 
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center justify-between">
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center justify-between mt-4">
         <div className="flex items-center gap-2 text-amber-800 font-medium text-sm"><AlertTriangle className="w-5 h-5" />74 records need your attention. Review unmatched transactions and exceptions.</div>
         <button className="flex items-center gap-1 text-sm font-semibold text-amber-700 hover:text-amber-900">Review results <ArrowRight className="w-4 h-4" /></button>
       </div>
 
-      {/* Tabel Status Modul */}
+      {/* --- TABEL STATUS MODUL --- */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mt-8 mb-8">
-        <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-50/50">
           <div className="relative flex-1 w-full max-w-md">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-            <input type="text" placeholder="Cari modul atau server..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+            <input type="text" placeholder="Cari modul atau server..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-sm" />
           </div>
           <div className="flex items-center gap-3 w-full md:w-auto relative">
             <div className="relative">
-              <select value={serverFilter} onChange={(e) => setServerFilter(e.target.value)} className="appearance-none px-4 py-2 pr-10 border border-slate-200 rounded-lg text-sm bg-white hover:bg-slate-50 font-medium text-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
-                <option value="Semua">Server: Semua</option><option value="ECO H0">ECO H0</option><option value="ECO H1">ECO H1</option><option value="CTO H1">CTO H1</option>
+              <select value={serverFilter} onChange={(e) => setServerFilter(e.target.value)} className="appearance-none px-4 py-2 pr-10 border border-slate-200 rounded-lg text-sm bg-white hover:bg-slate-50 font-medium text-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer shadow-sm">
+                <option value="Semua">Server: Semua</option><option value="ECO H0">ECO H0</option><option value="ECO H1">ECO H1</option><option value="CTO H1">CTO H1</option><option value="CTO H0">CTO H0</option>
               </select>
               <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-2.5 pointer-events-none" />
             </div>
             <div className="relative">
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="appearance-none px-4 py-2 pr-10 border border-slate-200 rounded-lg text-sm bg-white hover:bg-slate-50 font-medium text-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer">
+              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="appearance-none px-4 py-2 pr-10 border border-slate-200 rounded-lg text-sm bg-white hover:bg-slate-50 font-medium text-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer shadow-sm">
                 <option value="Semua">Status: Semua</option><option value="Aktif">Aktif</option><option value="Tidak aktif">Tidak aktif</option>
               </select>
               <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-2.5 pointer-events-none" />
@@ -277,9 +286,10 @@ export default function Overview() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-600">
-            <thead className="bg-slate-50 text-xs uppercase text-slate-400 font-semibold border-b border-slate-100">
+        {/* Isi Tabel Modul */}
+        <div className="max-h-[400px] overflow-y-auto overflow-x-auto">
+          <table className="w-full text-left text-sm text-slate-600 relative">
+            <thead className="bg-white text-xs uppercase text-slate-400 font-semibold border-b border-slate-200 sticky top-0 z-10">
               <tr>
                 <th className="px-5 py-4 w-16">No</th><th className="px-5 py-4">Modul</th><th className="px-5 py-4">Server</th>
                 <th className="px-5 py-4">Status</th><th className="px-5 py-4">SLA</th><th className="px-5 py-4">Match</th>
@@ -289,12 +299,12 @@ export default function Overview() {
             <tbody className="divide-y divide-slate-100">
               {filteredModulData.length > 0 ? (
                 filteredModulData.map((row) => (
-                  <tr key={row.no} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-5 py-4 font-medium text-slate-900">{row.no}</td><td className="px-5 py-4 font-medium text-slate-900">{row.modul}</td><td className="px-5 py-4">{row.server}</td>
-                    <td className="px-5 py-4"><span className={`font-medium ${row.status === 'Aktif' ? 'text-emerald-600' : 'text-red-500'}`}>{row.status}</span></td>
-                    <td className="px-5 py-4"><span className={`font-medium ${ row.sla === 'Tepat waktu' ? 'text-emerald-600' : row.sla === 'Terlambat' ? 'text-amber-500' : 'text-slate-400' }`}>{row.sla}</span></td>
-                    <td className="px-5 py-4">{row.match}</td><td className={`px-5 py-4 ${row.unmatch !== '-' ? 'text-red-500 font-medium' : 'text-slate-400'}`}>{row.unmatch}</td>
-                    <td className="px-5 py-4"><button className="text-indigo-600 font-medium flex items-center gap-1 hover:text-indigo-800 transition-colors">Lihat <ChevronRight className="w-3.5 h-3.5" /></button></td>
+                  <tr key={row.no} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-5 py-4 font-medium text-slate-900">{row.no}</td><td className="px-5 py-4 font-bold text-slate-800">{row.modul}</td><td className="px-5 py-4">{row.server}</td>
+                    <td className="px-5 py-4"><span className={`font-semibold ${row.status === 'Aktif' ? 'text-emerald-600' : 'text-red-500'}`}>{row.status}</span></td>
+                    <td className="px-5 py-4"><span className={`font-semibold ${ row.sla === 'Tepat waktu' ? 'text-emerald-600' : row.sla === 'Terlambat' ? 'text-amber-500' : 'text-slate-400' }`}>{row.sla}</span></td>
+                    <td className="px-5 py-4 font-medium">{row.match}</td><td className={`px-5 py-4 ${row.unmatch !== '-' ? 'text-red-500 font-bold' : 'text-slate-400'}`}>{row.unmatch}</td>
+                    <td className="px-5 py-4"><button className="text-indigo-600 font-bold flex items-center gap-1 hover:text-indigo-800 transition-colors">Lihat <ChevronRight className="w-4 h-4" /></button></td>
                   </tr>
                 ))
               ) : (
@@ -304,8 +314,35 @@ export default function Overview() {
           </table>
         </div>
       </div>
-      
-      {/* Footer Area (Next steps dll) bisa ditambahkan jika perlu */}
+
+      {/* --- TABEL RECENT BATCHES --- */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mt-8 mb-4">
+        <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <div><h3 className="font-bold text-slate-900 text-lg">Recent reconciliation batches</h3><p className="text-sm text-slate-500 mt-1">Daily settlement • Internal ledger ↔ Bank statement</p></div>
+          <button className="text-sm font-semibold text-indigo-600 flex items-center gap-1 hover:text-indigo-700 bg-indigo-50 px-3 py-2 rounded-lg">View all batches <ArrowRight className="w-4 h-4" /></button>
+        </div>
+        <div className="max-h-[350px] overflow-y-auto overflow-x-auto">
+          <table className="w-full text-left text-sm text-slate-600 relative">
+            <thead className="bg-white text-xs uppercase text-slate-400 font-semibold border-b border-slate-200 sticky top-0 z-10">
+              <tr>
+                <th className="px-5 py-4">Batch ID</th><th className="px-5 py-4">Settlement Date</th><th className="px-5 py-4">Transactions</th>
+                <th className="px-5 py-4">Match Rate</th><th className="px-5 py-4">Status</th><th className="px-5 py-4">Completed</th><th className="px-5 py-4">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {tableData.map((row, i) => (
+                <tr key={i} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-5 py-4 font-bold text-slate-800">{row.id}</td><td className="px-5 py-4">{row.date}</td><td className="px-5 py-4 font-medium">{row.tx}</td><td className="px-5 py-4 font-bold">{row.rate}</td>
+                  <td className="px-5 py-4"><span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${row.status === 'Reconciled' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-amber-50 text-amber-700 border border-amber-100'}`}><span className={`w-1.5 h-1.5 rounded-full ${row.status === 'Reconciled' ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>{row.status}</span></td>
+                  <td className="px-5 py-4 text-slate-500">{row.time}</td>
+                  <td className="px-5 py-4"><button className="text-indigo-600 font-bold flex items-center gap-1 hover:text-indigo-800">Detail <ArrowUpRight className="w-4 h-4" /></button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   );
 }

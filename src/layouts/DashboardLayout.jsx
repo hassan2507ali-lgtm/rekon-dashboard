@@ -1,32 +1,38 @@
 import { Outlet } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
+import { Bell } from 'lucide-react';
 
 export default function DashboardLayout() {
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      {/* Kolom Kiri: Sidebar (Lebarnya tetap) */}
-      <aside className="w-64 bg-white border-r border-slate-200 p-4 hidden md:flex flex-col">
-        <h2 className="text-2xl font-bold text-indigo-600 mb-8">rekon</h2>
-        
-        {/* Nanti daftar menu masuk di sini */}
-        <nav className="flex-1">
-          <ul className="space-y-2 text-slate-600 font-medium">
-            <li className="p-3 bg-indigo-50 text-indigo-600 rounded-lg">Overview</li>
-            <li className="p-3 hover:bg-slate-50 rounded-lg">Reporting</li>
-            <li className="p-3 hover:bg-slate-50 rounded-lg">Detail Rekon</li>
-          </ul>
-        </nav>
-      </aside>
+    <div className="flex h-screen bg-slate-50 overflow-hidden">
+      {/* Panggil komponen Sidebar di sini */}
+      <Sidebar />
 
-      {/* Kolom Kanan: Area Konten Dinamis */}
-      <main className="flex-1 flex flex-col">
-        {/* Nanti Header Atas (Pencarian, Notifikasi) masuk di sini */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center px-6">
-          <span className="text-sm text-slate-500">Workspace / Overview</span>
+      {/* Kolom Kanan: Area Konten */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Header Atas */}
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0">
+          <div className="text-sm text-slate-500 font-medium">
+            Workspace / <span className="text-slate-900 font-semibold">Overview</span>
+          </div>
+          
+          {/* Menu Kanan Header */}
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+              <span className="w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_4px_#10b981]"></span>
+              <span className="text-xs font-medium text-emerald-700">Live data</span>
+            </div>
+            <button className="text-slate-400 hover:text-slate-600">
+              <Bell className="w-5 h-5" />
+            </button>
+            <div className="text-sm text-slate-500 font-medium border-l border-slate-200 pl-6">
+              12 Oct 2026
+            </div>
+          </div>
         </header>
 
-        {/* Area utama tempat halaman Overview/Reporting muncul */}
+        {/* Area utama tempat halaman disisipkan */}
         <div className="p-6 flex-1 overflow-auto">
-          {/* Outlet adalah tempat komponen Pages akan disisipkan oleh React Router */}
           <Outlet /> 
         </div>
       </main>

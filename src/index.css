@@ -1,2 +1,17 @@
-
 @import "tailwindcss";
+
+@theme {
+  /* Menjadikan Inter sebagai fon sans-serif bawaan (menggantikan Arial/system-ui) */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* 
+  Menerapkan warna latar belakang halaman abu-abu sangat terang (slate-50)
+  dan warna teks bawaan slate-900 (sedikit lebih lembut dari hitam murni)
+  ke seluruh aplikasi agar seragam.
+*/
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+}

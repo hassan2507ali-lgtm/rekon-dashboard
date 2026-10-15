@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Calendar, Plus, Layers, CheckCircle2, RefreshCcw, AlertTriangle, ArrowRight, ArrowUpRight, User, Search, FileText } from 'lucide-react';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 
@@ -26,12 +25,8 @@ const tableData = [
 ];
 
 export default function Overview() {
-  // State untuk menyimpan filter waktu yang aktif
-  const [activeFilter, setActiveFilter] = useState('Today');
-
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-10">
-      
       {/* --- HEADER --- */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -39,37 +34,27 @@ export default function Overview() {
           <p className="text-slate-500 mt-1">Monitor reconciliation performance and keep your daily close on track.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"><Calendar className="w-4 h-4 text-slate-500" />12 Oct 2026</button>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-semibold shadow-sm hover:bg-indigo-700"><Plus className="w-4 h-4" />New reconciliation</button>
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 shadow-sm"><Calendar className="w-4 h-4 text-slate-500" />12 Oct 2026</button>
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-semibold shadow-sm"><Plus className="w-4 h-4" />New reconciliation</button>
         </div>
       </div>
 
-      {/* --- TAB FILTER WAKTU DINAMIS --- */}
       <div className="flex items-center gap-1 p-1 bg-slate-100/80 rounded-lg w-fit border border-slate-200/50">
-        {['Today', '7 days', '30 days'].map((filterName) => (
-          <button
-            key={filterName}
-            onClick={() => setActiveFilter(filterName)}
-            className={`px-5 py-1.5 text-sm rounded transition-colors shadow-sm ${
-              activeFilter === filterName
-                ? 'bg-white text-indigo-600 font-semibold' 
-                : 'text-slate-500 font-medium hover:text-slate-700 shadow-none hover:bg-slate-200/50' 
-            }`}
-          >
-            {filterName}
-          </button>
-        ))}
+        <button className="px-5 py-1.5 bg-white text-indigo-600 font-semibold rounded shadow-sm text-sm">Today</button>
+        <button className="px-5 py-1.5 text-slate-500 font-medium text-sm">7 days</button>
+        <button className="px-5 py-1.5 text-slate-500 font-medium text-sm">30 days</button>
       </div>
 
       {/* --- KARTU METRIK --- */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* ... (Kode 4 Kartu Metrik sama seperti sebelumnya, dipersingkat di sini agar fokus ke tabel bawah) ... */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
           <div className="flex justify-between items-start mb-4"><span className="text-sm font-medium text-slate-600">Transactions processed</span><div className="p-1.5 bg-indigo-50 rounded text-indigo-600"><Layers className="w-4 h-4" /></div></div>
           <div><div className="flex items-end gap-3 mb-1"><h3 className="text-3xl font-bold text-slate-900">12,480</h3><span className="text-xs font-medium text-indigo-600 flex items-center">↑ 11.0%</span></div><p className="text-xs text-slate-500">$2,486,920.40 total ledger value</p></div>
         </div>
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
           <div className="flex justify-between items-start mb-4"><span className="text-sm font-medium text-slate-600">Match rate</span><div className="p-1.5 bg-emerald-50 rounded text-emerald-600"><CheckCircle2 className="w-4 h-4" /></div></div>
-          <div><div className="flex items-end gap-3 mb-1"><h3 className="text-3xl font-bold text-slate-900">97.00%</h3><span className="text-xs font-medium text-emerald-600 flex items-center">↑ 0.8 pp</span></div><p className="text-xs text-indigo-600 underline cursor-pointer">12,106 transactions matched</p></div>
+          <div><div className="flex items-end gap-3 mb-1"><h3 className="text-3xl font-bold text-slate-900">97.00%</h3><span className="text-xs font-medium text-emerald-600 flex items-center">↑ 0.8 pp</span></div><p className="text-xs text-indigo-600 underline">12,106 transactions matched</p></div>
         </div>
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
           <div className="flex justify-between items-start mb-4"><span className="text-sm font-medium text-slate-600">Unmatched records</span><div className="p-1.5 bg-amber-50 rounded text-amber-600"><RefreshCcw className="w-4 h-4" /></div></div>
@@ -114,7 +99,7 @@ export default function Overview() {
 
       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center justify-between">
         <div className="flex items-center gap-2 text-amber-800 font-medium text-sm"><AlertTriangle className="w-5 h-5" />74 records need your attention. Review unmatched transactions and exceptions in the latest batch.</div>
-        <button className="flex items-center gap-1 text-sm font-semibold text-amber-700 hover:text-amber-900">Review results <ArrowRight className="w-4 h-4" /></button>
+        <button className="flex items-center gap-1 text-sm font-semibold text-amber-700">Review results <ArrowRight className="w-4 h-4" /></button>
       </div>
 
       {/* --- TABEL BATCH BARU --- */}
@@ -157,7 +142,7 @@ export default function Overview() {
           </table>
         </div>
       </div>
-      <p className="text-xs text-slate-400 px-1 mt-2">All amounts in USD • Times shown in UTC</p>
+      <p className="text-xs text-slate-400 px-1">All amounts in USD • Times shown in UTC</p>
 
       {/* --- NEXT STEPS --- */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mt-8">

@@ -1,82 +1,87 @@
-import { LayoutDashboard, FileText, ArrowLeftRight, CheckCircle, ChevronDown, Circle } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
+import { LayoutDashboard, FileText, FileSpreadsheet, CheckCircle2, Settings } from 'lucide-react';
+// Import logo Mandiri dari folder assets (sesuaikan nama fail jika berbeda)
+import logoMandiri from '../assets/mandiri-logo.png';
 
 export default function Sidebar() {
-  const location = useLocation();
-
-  // Fungsi untuk mengecek apakah path saat ini sedang aktif
-  const isActive = (path) => location.pathname === path;
-
-  // Variabel untuk gaya menu (aktif vs tidak aktif)
-  const baseMenuClass = "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors";
-  const activeClass = "bg-indigo-50 text-indigo-600";
-  const inactiveClass = "text-slate-600 hover:bg-slate-50";
+  const navItems = [
+    { name: 'Overview', path: '/', icon: LayoutDashboard },
+    { name: 'Reporting', path: '/reporting', icon: FileText },
+    { name: 'Detail Rekon', path: '/detail-rekon', icon: FileSpreadsheet },
+    { name: 'Rekon Result', path: '/rekon-result', icon: CheckCircle2 },
+  ];
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col h-screen hidden md:flex shrink-0">
-      {/* Logo Area */}
-      <div className="h-16 flex items-center px-6">
-        <div className="text-xl font-bold text-slate-800 flex items-center gap-2">
-          <div className="bg-indigo-600 rounded p-1">
-            <ArrowLeftRight className="w-5 h-5 text-white" />
-          </div>
-          rekon
-        </div>
-      </div>
-
-      {/* Workspace Selector */}
-      <div className="px-4 py-4">
-        <div className="flex items-center justify-between p-2 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
-              A
-            </div>
-            <div>
-              <div className="text-sm font-semibold text-slate-900">Acme Finance</div>
-              <div className="text-xs text-slate-500">Enterprise workspace</div>
-            </div>
-          </div>
-          <ChevronDown className="w-4 h-4 text-slate-400" />
-        </div>
-      </div>
-
-      {/* Navigation Menu */}
-      <div className="px-4 py-2 flex-1">
-        <div className="text-xs font-semibold text-slate-400 mb-4 px-2 uppercase tracking-wider">Workspace</div>
-        <nav className="space-y-1">
-          <Link to="/" className={`${baseMenuClass} ${isActive('/') ? activeClass : inactiveClass}`}>
-            <LayoutDashboard className="w-5 h-5" />
-            Overview
-          </Link>
-          <Link to="/reporting" className={`${baseMenuClass} ${isActive('/reporting') ? activeClass : inactiveClass}`}>
-            <FileText className="w-5 h-5" />
-            Reporting
-          </Link>
-          <Link to="/detail-rekon" className={`${baseMenuClass} ${isActive('/detail-rekon') ? activeClass : inactiveClass}`}>
-            <ArrowLeftRight className="w-5 h-5" />
-            Detail Rekon
-          </Link>
-          <Link to="/rekon-result" className={`${baseMenuClass} ${isActive('/rekon-result') ? activeClass : inactiveClass}`}>
-            <CheckCircle className="w-5 h-5" />
-            Rekon Result
-          </Link>
-        </nav>
-      </div>
+    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0">
       
-      {/* Connected Server */}
-      <div className="px-4 py-6 border-t border-slate-100">
-        <div className="text-xs font-semibold text-slate-400 mb-4 px-2 uppercase tracking-wider">Connected Server</div>
-        <div className="space-y-3 px-2">
-            <div className="flex items-center justify-between text-sm text-slate-600">
-                <span>ECO H0</span>
-                <Circle className="w-2 h-2 fill-emerald-500 text-emerald-500" />
+      {/* --- LOGO / HEADER SIDEBAR (Hanya Logo, Bersih & Profesional) --- */}
+      <div className="h-16 border-b border-slate-200 flex items-center px-6">
+        <img 
+          src={logoMandiri} 
+          alt="Logo Mandiri" 
+          className="h-30 w-auto object-contain object-left" 
+        />
+      </div>
+
+      {/* --- MENU NAVIGASI --- */}
+      <div className="p-4 flex-1 space-y-1">
+        <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Workspace</p>
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === '/'}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
+                  isActive
+                    ? 'bg-indigo-50 text-indigo-600'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`
+              }
+            >
+              <Icon className="w-4 h-4" />
+              {item.name}
+            </NavLink>
+          );
+        })}
+      </div>
+
+      {/* --- CONNECTED SOURCES & SETTINGS DI BAWAH --- */}
+      <div className="p-4 border-t border-slate-200 space-y-4">
+        <div>
+          <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Connected Sources</p>
+          <div className="space-y-1 px-3 text-sm text-slate-600">
+            <div className="flex items-center justify-between py-1">
+              <span>ECO H0</span>
+              <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
             </div>
-            <div className="flex items-center justify-between text-sm text-slate-600">
-                <span>ECO H1</span>
-                <Circle className="w-2 h-2 fill-emerald-500 text-emerald-500" />
+            <div className="flex items-center justify-between py-1">
+              <span>ECO H1</span>
+              <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
             </div>
+            <div className="flex items-center justify-between py-1">
+              <span>CTO H0</span>
+              <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+            </div>
+          </div>
+        </div>
+
+ 
+
+        {/* Profil Singkat di Bawah */}
+        <div className="flex items-center gap-3 px-3 py-2 bg-slate-50 rounded-xl border border-slate-100">
+          <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
+            HA
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-slate-900 truncate">Admin</p>
+            <p className="text-[10px] text-slate-500 truncate">Mandiris</p>
+          </div>
         </div>
       </div>
+
     </aside>
   );
 }

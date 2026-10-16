@@ -5,28 +5,20 @@ import DetailRekon from './pages/DetailRekon';
 import Reporting from './pages/Reporting';
 import RekonResult from './pages/RekonResult';
 import Login from './pages/Login';
+import Settings from './pages/Settings'; // 1. Tambahkan import ini
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Rute Login berdiri sendiri di luar DashboardLayout */}
         <Route path="/login" element={<Login />} />
         
-        {/* DashboardLayout membungkus semua halaman agar Sidebar dan Header tetap ada */}
         <Route path="/" element={<DashboardLayout />}>
-          
-          {/* Halaman default (Overview) saat user membuka localhost:5173/ */}
           <Route index element={<Overview />} />
-          
-          {/* Halaman Reporting */}
           <Route path="reporting" element={<Reporting />} />
-          
-          {/* Halaman Detail Rekon */}
           <Route path="detail-rekon" element={<DetailRekon />} />
-          
-          {/* Halaman Rekon Result */}
           <Route path="rekon-result" element={<RekonResult />} />
+          <Route path="settings" element={<Settings />} /> {/* 2. Tambahkan rute ini */}
         </Route>
       </Routes>
     </BrowserRouter>

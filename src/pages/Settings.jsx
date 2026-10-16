@@ -1,17 +1,28 @@
 import { useState } from 'react';
-import { User, Clock, Server, Shield, Bell, Save } from 'lucide-react';
+import { User, Clock, Server, Shield, Bell, Save, CheckCircle2, X } from 'lucide-react';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('profile');
   const [isSaving, setIsSaving] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   const handleSave = () => {
     setIsSaving(true);
-    setTimeout(() => setIsSaving(false), 1000);
+    
+    // Simulasi proses simpan ke server (1 detik)
+    setTimeout(() => {
+      setIsSaving(false);
+      setShowToast(true); // Munculkan toast
+      
+      // Sembunyikan toast otomatis setelah 3 detik
+      setTimeout(() => {
+        setShowToast(false);
+      }, 3000);
+    }, 1000);
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6 relative h-full">
       
       {/* Header Halaman */}
       <div>
@@ -19,7 +30,7 @@ export default function Settings() {
         <p className="text-slate-500 text-sm mt-1">Manage your account settings and system configurations.</p>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col md:flex-row gap-6 pb-20">
         
         {/* Sidebar Navigasi Settings */}
         <div className="w-full md:w-64 shrink-0">
@@ -59,11 +70,11 @@ export default function Settings() {
             <div className="space-y-6 animate-in fade-in duration-300">
               <div className="flex items-center gap-6 pb-6 border-b border-slate-100">
                 <div className="w-20 h-20 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-2xl font-bold border-4 border-white shadow-sm">
-                  HA
+                  MA
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900">Admin</h3>
-                  <p className="text-slate-500 text-sm">Admin@bankmandiri.co.id</p>
+                  <h3 className="text-xl font-bold text-slate-900">Muhammad Ali</h3>
+                  <p className="text-slate-500 text-sm">m.ali@bankmandiri.co.id</p>
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mt-2">
                     <Shield className="w-3 h-3" /> System Administrator
                   </span>
@@ -73,7 +84,7 @@ export default function Settings() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">Full Name</label>
-                  <input type="text" defaultValue="Hassan Ali" className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-900 text-sm focus:ring-2 focus:ring-indigo-600 focus:border-transparent" />
+                  <input type="text" defaultValue="Muhammad Ali" className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-900 text-sm focus:ring-2 focus:ring-indigo-600 focus:border-transparent" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-2">NIP (Nomor Induk Pegawai)</label>
@@ -183,6 +194,21 @@ export default function Settings() {
 
         </div>
       </div>
+
+      {/* --- TOAST NOTIFICATION --- */}
+      {showToast && (
+        <div className="fixed bottom-8 right-8 z-50 flex items-center gap-3 bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-2xl animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+          <p className="text-sm font-medium">Settings saved successfully.</p>
+          <button 
+            onClick={() => setShowToast(false)} 
+            className="ml-4 text-slate-400 hover:text-white transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
     </div>
   );
 }

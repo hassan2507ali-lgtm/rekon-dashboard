@@ -9,6 +9,7 @@ export default function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
+    
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans text-slate-900">
       
       {/* Mengirim state ke Sidebar */}

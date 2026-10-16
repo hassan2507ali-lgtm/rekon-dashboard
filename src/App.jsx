@@ -4,11 +4,15 @@ import Overview from './pages/Overview';
 import DetailRekon from './pages/DetailRekon';
 import Reporting from './pages/Reporting';
 import RekonResult from './pages/RekonResult';
+import Login from './pages/Login';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Rute Login berdiri sendiri di luar DashboardLayout */}
+        <Route path="/login" element={<Login />} />
+        
         {/* DashboardLayout membungkus semua halaman agar Sidebar dan Header tetap ada */}
         <Route path="/" element={<DashboardLayout />}>
           
@@ -23,7 +27,6 @@ function App() {
           
           {/* Halaman Rekon Result */}
           <Route path="rekon-result" element={<RekonResult />} />
-          
         </Route>
       </Routes>
     </BrowserRouter>

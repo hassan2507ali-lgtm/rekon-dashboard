@@ -216,7 +216,7 @@ export default function Overview() {
         
         {/* Modul Bar Chart */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h3 className="font-semibold text-slate-900 capitalize">{activeFilter === 'Today' ? "Today's" : activeFilter} Moduls</h3>
+          <h3 className="font-semibold text-slate-900 capitalize">{activeFilter === 'Today' ? "" : activeFilter} Moduls</h3>
           <p className="text-xs text-slate-500 mb-6">{totalModulRecords} records • All Servers</p>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">

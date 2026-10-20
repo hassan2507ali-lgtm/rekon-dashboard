@@ -30,7 +30,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           <img 
             src={logoMandiri} 
             alt="Logo Mandiri" 
-            className="h-7 w-auto object-contain object-left" 
+            className="h-25 w-auto object-contain object-left" 
           />
           {/* Tombol Close (Hanya muncul di Mobile) */}
           <button 

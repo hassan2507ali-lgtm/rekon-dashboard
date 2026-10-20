@@ -1,7 +1,11 @@
 import { useState } from 'react';
-import { Search, ChevronDown, CheckCircle2, AlertTriangle, RefreshCcw, FileSpreadsheet, Download, Filter, ChevronRight, Eye, X, FileText, UserPlus } from 'lucide-react';
+import { 
+  Search, ChevronDown, CheckCircle2, AlertTriangle, RefreshCcw, 
+  FileSpreadsheet, Download, Filter, Eye, X, FileText, UserPlus, 
+  Activity, Ban, ArrowUpRight 
+} from 'lucide-react';
 
-// --- DATA DUMMY DIPERBANYAK (Banyak Unmatched & Exception) ---
+// --- DATA TRANSAKSI (Existing) ---
 const initialDetailData = [
   { id: 'TRX-82910', date: '12 Oct 2026 08:12', module: 'Modul 03', server: 'ECO H1', status: 'Aktif', internalAmt: 'Rp 12.500.000', bankAmt: 'Rp 12.500.000', match: 'Matched', intRef: 'INT-991029', bnkRef: 'BNK-991029', merchant: 'MDR-PAY-01' },
   { id: 'TRX-82911', date: '12 Oct 2026 08:15', module: 'Modul 11', server: 'ECO H1', status: 'Aktif', internalAmt: 'Rp 4.350.000', bankAmt: 'Rp 4.350.000', match: 'Matched', intRef: 'INT-991030', bnkRef: 'BNK-991030', merchant: 'MDR-PAY-02' },
@@ -36,13 +40,27 @@ const serverSummaryData = {
   }
 };
 
+// --- DATA MONITORING MODUL (Baru) ---
+const moduleStats = {
+  total: 156,
+  active: { count: 130, percentage: 83.3 },
+  inactiveInvalid: { count: 18, percentage: 11.5 },
+  inactiveGNC: { count: 8, percentage: 5.2 }
+};
+
+const gncModules = [
+  { id: 'MDL-882', name: 'Legacy Payment Gateway', txCount: 145, amount: 'Rp 245.000.000', lastTx: '2 hours ago' },
+  { id: 'MDL-710', name: 'Promo Cashback 2025', txCount: 32, amount: 'Rp 12.500.000', lastTx: '5 hours ago' },
+];
+
+
 export default function DetailRekon() {
   const [searchTerm, setSearchTerm] = useState('');
   const [serverFilter, setServerFilter] = useState('Semua');
   const [statusFilter, setStatusFilter] = useState('Semua');
   const [matchFilter, setMatchFilter] = useState('Semua');
   
-  // --- STATE UNTUK DRAWER DETAIL ---
+  // State Drawer
   const [selectedTrx, setSelectedTrx] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -56,123 +74,233 @@ export default function DetailRekon() {
 
   const currentSummary = serverSummaryData[serverFilter];
 
-  // Fungsi Buka Drawer
   const openDetail = (trx) => {
     setSelectedTrx(trx);
     setIsDrawerOpen(true);
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-10 relative">
+    <div className="space-y-8 max-w-7xl mx-auto pb-10 relative animate-in fade-in duration-300">
       
-      {/* Header & Filter Controls (Tetap sama) */}
+      {/* HEADER UTAMA */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Detail Rekon</h1>
-          <p className="text-slate-500 mt-1 text-sm">Drill down into transaction-level reconciliation data and compare sources.</p>
+          <p className="text-slate-500 mt-1 text-sm">Monitor module statuses, anomalies, and drill down into transaction-level data.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"><Filter className="w-4 h-4" /> Advanced Filter</button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold shadow-sm hover:bg-indigo-700"><Download className="w-4 h-4" /> Export Data</button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+            <Filter className="w-4 h-4" /> Advanced Filter
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold shadow-sm hover:bg-indigo-700">
+            <Download className="w-4 h-4" /> Export Data
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4"><div className="p-3 bg-slate-50 text-slate-600 rounded-lg"><FileSpreadsheet className="w-6 h-6" /></div><div><p className="text-sm font-medium text-slate-500">Total Transactions</p><h3 className="text-2xl font-bold text-slate-900">12,480</h3></div></div>
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4"><div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg"><CheckCircle2 className="w-6 h-6" /></div><div><p className="text-sm font-medium text-slate-500">Perfect Match</p><h3 className="text-2xl font-bold text-slate-900">12,106</h3></div></div>
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4"><div className="p-3 bg-amber-50 text-amber-600 rounded-lg"><RefreshCcw className="w-6 h-6" /></div><div><p className="text-sm font-medium text-slate-500">Requires Audit</p><h3 className="text-2xl font-bold text-slate-900">374</h3></div></div>
-      </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mt-6">
-        <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-white">
-          <div><h3 className="font-semibold text-slate-900 text-lg">Source Comparison</h3><p className="text-sm text-slate-500">Internal Ledger vs Bank Statement</p></div>
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            <div className="relative w-full md:w-64"><Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" /><input type="text" placeholder="Cari TRX ID..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20" /></div>
-            <div className="relative"><select value={serverFilter} onChange={(e) => setServerFilter(e.target.value)} className="appearance-none px-4 py-2 pr-10 border border-slate-200 rounded-lg text-sm bg-white hover:bg-slate-50 font-medium text-slate-700 cursor-pointer"><option value="Semua">Server: Semua</option><option value="ECO H0">ECO H0</option><option value="ECO H1">ECO H1</option><option value="CTO H1">CTO H1</option></select><ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-2.5 pointer-events-none" /></div>
-            <div className="relative"><select value={matchFilter} onChange={(e) => setMatchFilter(e.target.value)} className="appearance-none px-4 py-2 pr-10 border border-slate-200 rounded-lg text-sm bg-white hover:bg-slate-50 font-medium text-slate-700 cursor-pointer"><option value="Semua">Result: Semua</option><option value="Matched">Matched</option><option value="Unmatched">Unmatched</option><option value="Exception">Exception</option></select><ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-2.5 pointer-events-none" /></div>
+      {/* =========================================
+          SECTION 1: MODULE-LEVEL MONITORING (NEW)
+          ========================================= */}
+      <div className="space-y-4">
+        <h2 className="text-lg font-bold text-slate-800 border-b border-slate-200 pb-2">Module Status Overview</h2>
+        
+        {/* WIDGET 1: MODULE STATUS ANALYTICS */}
+        <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-bold text-slate-900 flex items-center gap-2">
+              <Activity className="w-5 h-5 text-indigo-600" /> System Modules Health
+            </h3>
+            <span className="text-sm font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+              Total: {moduleStats.total} Modules
+            </span>
           </div>
-        </div>
 
-        <div className="p-5 bg-slate-50 border-b border-slate-100">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white p-4 border border-slate-200 rounded-lg shadow-sm"><h4 className="text-slate-800 font-semibold mb-4">Timeline proses ({serverFilter})</h4><div className="space-y-3">{currentSummary.timeline.map((item, idx) => (<div key={idx} className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></div><p className="text-sm text-slate-600"><span className="font-semibold text-slate-800 mr-2">{item.time}</span> {item.text}</p></div>))}</div></div>
-            <div className="bg-white p-4 border border-slate-200 rounded-lg shadow-sm">
-              <h4 className="text-slate-800 font-semibold mb-4">Ringkasan hasil ({serverFilter})</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between items-center"><span className="text-slate-500">Total transaksi</span><span className="font-bold text-slate-800">{currentSummary.summary.total}</span></div>
-                <div className="flex justify-between items-center"><span className="text-slate-500">Match</span><span className="font-bold text-emerald-600">{currentSummary.summary.match} ({currentSummary.summary.matchPct}%)</span></div>
-                <div className="flex justify-between items-center"><span className="text-slate-500">Unmatch</span><span className="font-bold text-red-500">{currentSummary.summary.unmatch}</span></div>
+          {/* Bar Chart Proporsional */}
+          <div className="w-full h-4 flex rounded-full overflow-hidden mb-6 bg-slate-100">
+            <div style={{ width: `${moduleStats.active.percentage}%` }} className="bg-emerald-500 hover:brightness-110 transition-all cursor-pointer" title="Active"></div>
+            <div style={{ width: `${moduleStats.inactiveInvalid.percentage}%` }} className="bg-slate-300 hover:brightness-95 transition-all cursor-pointer" title="Inactive - Invalid"></div>
+            <div style={{ width: `${moduleStats.inactiveGNC.percentage}%` }} className="bg-rose-500 hover:brightness-110 transition-all cursor-pointer animate-pulse" title="Inactive - GNC"></div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Active */}
+            <div className="p-4 rounded-lg border border-emerald-100 bg-emerald-50/50">
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span className="text-sm font-bold text-emerald-900">Active</span>
+                </div>
+                <span className="text-lg font-black text-emerald-700">{moduleStats.active.count}</span>
               </div>
-              <div className="mt-4 h-3 w-full bg-red-500 rounded-full flex overflow-hidden"><div className="bg-emerald-500 h-full transition-all duration-500" style={{ width: `${currentSummary.summary.barPct}%` }}></div></div>
+              <p className="text-xs text-emerald-700/70 font-medium">Normal operational modules</p>
+            </div>
+            {/* Inactive Invalid */}
+            <div className="p-4 rounded-lg border border-slate-200 bg-slate-50">
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex items-center gap-2">
+                  <Ban className="w-4 h-4 text-slate-500" />
+                  <span className="text-sm font-bold text-slate-700">Not Active (Invalid)</span>
+                </div>
+                <span className="text-lg font-black text-slate-700">{moduleStats.inactiveInvalid.count}</span>
+              </div>
+              <p className="text-xs text-slate-500 font-medium">No transactions recorded (Safe)</p>
+            </div>
+            {/* Inactive GNC */}
+            <div className="p-4 rounded-lg border border-rose-200 bg-rose-50 relative overflow-hidden">
+              <div className="flex justify-between items-start mb-2 relative z-10">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-rose-600" />
+                  <span className="text-sm font-bold text-rose-900">Not Active (GNC)</span>
+                </div>
+                <span className="text-lg font-black text-rose-700">{moduleStats.inactiveGNC.count}</span>
+              </div>
+              <p className="text-xs text-rose-700/80 font-medium">Warning: Still receiving transactions!</p>
             </div>
           </div>
         </div>
 
-        {/* --- TABEL DATA --- */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-600">
-            <thead className="bg-white text-xs uppercase text-slate-400 font-semibold border-b border-slate-100">
-              <tr>
-                <th className="px-5 py-4">TRX ID</th>
-                <th className="px-5 py-4">Date & Time</th>
-                <th className="px-5 py-4">Modul</th>
-                <th className="px-5 py-4 bg-indigo-50/50">Internal Ledger</th>
-                <th className="px-5 py-4 bg-emerald-50/50">Bank Statement</th>
-                <th className="px-5 py-4">Match Status</th>
-                <th className="px-5 py-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredData.length > 0 ? (
-                filteredData.map((row, index) => (
-                  <tr key={index} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-5 py-4 font-semibold text-slate-900">{row.id}</td>
-                    <td className="px-5 py-4 text-slate-500">{row.date}</td>
-                    <td className="px-5 py-4 font-medium">{row.module}</td>
-                    <td className="px-5 py-4 font-medium text-slate-800 bg-indigo-50/30">{row.internalAmt}</td>
-                    <td className="px-5 py-4 font-medium text-slate-800 bg-emerald-50/30">{row.bankAmt}</td>
-                    <td className="px-5 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium 
-                        ${row.match === 'Matched' ? 'bg-emerald-50 text-emerald-700' : row.match === 'Unmatched' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700'}`}
-                      >
-                        {row.match === 'Matched' ? <CheckCircle2 className="w-3.5 h-3.5" /> : row.match === 'Unmatched' ? <RefreshCcw className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
-                        {row.match}
+        {/* WIDGET 2: GNC ANOMALY LIST */}
+        <div className="bg-white border border-rose-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-rose-50 px-5 py-3 border-b border-rose-100 flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-rose-900 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-600" /> Critical Action Required: GNC Modules
+              </h3>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-white text-slate-500 font-semibold border-b border-slate-100 text-xs">
+                <tr>
+                  <th className="px-5 py-3">Module ID</th>
+                  <th className="px-5 py-3">Module Name</th>
+                  <th className="px-5 py-3">Pending Tx (GNC)</th>
+                  <th className="px-5 py-3">Suspense Amount</th>
+                  <th className="px-5 py-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700 font-medium">
+                {gncModules.map((item) => (
+                  <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-5 py-3 font-mono text-indigo-600">{item.id}</td>
+                    <td className="px-5 py-3">{item.name}</td>
+                    <td className="px-5 py-3">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-xs font-bold">
+                        {item.txCount} tx
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-right">
-                      {/* --- TOMBOL DETAIL BARU --- */}
-                      <button 
-                        onClick={() => openDetail(row)}
-                        className="text-indigo-600 font-semibold inline-flex items-center gap-1.5 hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors"
-                      >
-                        <Eye className="w-4 h-4" /> Detail
+                    <td className="px-5 py-3 text-slate-900">{item.amount}</td>
+                    <td className="px-5 py-3 text-right">
+                      <button className="inline-flex items-center gap-1 text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
+                        Investigate <ArrowUpRight className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr><td colSpan="7" className="px-5 py-12 text-center text-slate-500">Tidak ada transaksi ditemukan</td></tr>
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+
+      {/* =========================================
+          SECTION 2: TRANSACTION-LEVEL RECONCILIATION
+          ========================================= */}
+      <div className="space-y-4 pt-4">
+        <h2 className="text-lg font-bold text-slate-800 border-b border-slate-200 pb-2">Transaction Detail & Comparison</h2>
+
+        {/* Existing: 3 Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4"><div className="p-3 bg-slate-50 text-slate-600 rounded-lg"><FileSpreadsheet className="w-6 h-6" /></div><div><p className="text-sm font-medium text-slate-500">Total Transactions</p><h3 className="text-2xl font-bold text-slate-900">12,480</h3></div></div>
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4"><div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg"><CheckCircle2 className="w-6 h-6" /></div><div><p className="text-sm font-medium text-slate-500">Perfect Match</p><h3 className="text-2xl font-bold text-slate-900">12,106</h3></div></div>
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4"><div className="p-3 bg-amber-50 text-amber-600 rounded-lg"><RefreshCcw className="w-6 h-6" /></div><div><p className="text-sm font-medium text-slate-500">Requires Audit</p><h3 className="text-2xl font-bold text-slate-900">374</h3></div></div>
+        </div>
+
+        {/* Existing: Source Comparison Box & Timeline */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mt-6">
+          <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-white">
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+              <div className="relative w-full md:w-64"><Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" /><input type="text" placeholder="Cari TRX ID..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20" /></div>
+              <div className="relative"><select value={serverFilter} onChange={(e) => setServerFilter(e.target.value)} className="appearance-none px-4 py-2 pr-10 border border-slate-200 rounded-lg text-sm bg-white hover:bg-slate-50 font-medium text-slate-700 cursor-pointer"><option value="Semua">Server: Semua</option><option value="ECO H0">ECO H0</option><option value="ECO H1">ECO H1</option><option value="CTO H1">CTO H1</option></select><ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-2.5 pointer-events-none" /></div>
+              <div className="relative"><select value={matchFilter} onChange={(e) => setMatchFilter(e.target.value)} className="appearance-none px-4 py-2 pr-10 border border-slate-200 rounded-lg text-sm bg-white hover:bg-slate-50 font-medium text-slate-700 cursor-pointer"><option value="Semua">Result: Semua</option><option value="Matched">Matched</option><option value="Unmatched">Unmatched</option><option value="Exception">Exception</option></select><ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-2.5 pointer-events-none" /></div>
+            </div>
+          </div>
+
+          <div className="p-5 bg-slate-50 border-b border-slate-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white p-4 border border-slate-200 rounded-lg shadow-sm"><h4 className="text-slate-800 font-semibold mb-4">Timeline proses ({serverFilter})</h4><div className="space-y-3">{currentSummary.timeline.map((item, idx) => (<div key={idx} className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></div><p className="text-sm text-slate-600"><span className="font-semibold text-slate-800 mr-2">{item.time}</span> {item.text}</p></div>))}</div></div>
+              <div className="bg-white p-4 border border-slate-200 rounded-lg shadow-sm">
+                <h4 className="text-slate-800 font-semibold mb-4">Ringkasan hasil ({serverFilter})</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between items-center"><span className="text-slate-500">Total transaksi</span><span className="font-bold text-slate-800">{currentSummary.summary.total}</span></div>
+                  <div className="flex justify-between items-center"><span className="text-slate-500">Match</span><span className="font-bold text-emerald-600">{currentSummary.summary.match} ({currentSummary.summary.matchPct}%)</span></div>
+                  <div className="flex justify-between items-center"><span className="text-slate-500">Unmatch</span><span className="font-bold text-red-500">{currentSummary.summary.unmatch}</span></div>
+                </div>
+                <div className="mt-4 h-3 w-full bg-red-500 rounded-full flex overflow-hidden"><div className="bg-emerald-500 h-full transition-all duration-500" style={{ width: `${currentSummary.summary.barPct}%` }}></div></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Existing: MAIN TABLE DATA */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-slate-600">
+              <thead className="bg-white text-xs uppercase text-slate-400 font-semibold border-b border-slate-100">
+                <tr>
+                  <th className="px-5 py-4">TRX ID</th>
+                  <th className="px-5 py-4">Date & Time</th>
+                  <th className="px-5 py-4">Modul</th>
+                  <th className="px-5 py-4 bg-indigo-50/50">Internal Ledger</th>
+                  <th className="px-5 py-4 bg-emerald-50/50">Bank Statement</th>
+                  <th className="px-5 py-4">Match Status</th>
+                  <th className="px-5 py-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredData.length > 0 ? (
+                  filteredData.map((row, index) => (
+                    <tr key={index} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-5 py-4 font-semibold text-slate-900">{row.id}</td>
+                      <td className="px-5 py-4 text-slate-500">{row.date}</td>
+                      <td className="px-5 py-4 font-medium">{row.module}</td>
+                      <td className="px-5 py-4 font-medium text-slate-800 bg-indigo-50/30">{row.internalAmt}</td>
+                      <td className="px-5 py-4 font-medium text-slate-800 bg-emerald-50/30">{row.bankAmt}</td>
+                      <td className="px-5 py-4">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium 
+                          ${row.match === 'Matched' ? 'bg-emerald-50 text-emerald-700' : row.match === 'Unmatched' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700'}`}
+                        >
+                          {row.match === 'Matched' ? <CheckCircle2 className="w-3.5 h-3.5" /> : row.match === 'Unmatched' ? <RefreshCcw className="w-3.5 h-3.5" /> : <AlertTriangle className="w-3.5 h-3.5" />}
+                          {row.match}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        <button 
+                          onClick={() => openDetail(row)}
+                          className="text-indigo-600 font-semibold inline-flex items-center gap-1.5 hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          <Eye className="w-4 h-4" /> Detail
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr><td colSpan="7" className="px-5 py-12 text-center text-slate-500">Tidak ada transaksi ditemukan</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       {/* =========================================
-          DRAWER DETAIL TRANSAKSI (Muncul di Kanan) 
+          DRAWER DETAIL TRANSAKSI (TETAP SAMA)
           ========================================= */}
       {isDrawerOpen && selectedTrx && (
         <div className="fixed inset-0 z-50 flex justify-end">
-          {/* Overlay Gelap di Background */}
-          <div 
-            className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" 
-            onClick={() => setIsDrawerOpen(false)}
-          ></div>
+          <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" onClick={() => setIsDrawerOpen(false)}></div>
           
-          {/* Panel Putih di Kanan */}
           <div className="relative w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
-            
-            {/* Drawer Header */}
             <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
               <div>
                 <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
@@ -191,10 +319,7 @@ export default function DetailRekon() {
               </button>
             </div>
 
-            {/* Drawer Body (Bisa di-scroll) */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              
-              {/* Pesan Error (Hanya muncul jika Unmatched/Exception) */}
               {selectedTrx.match !== 'Matched' && (
                 <div className={`p-4 rounded-xl border flex gap-3 ${selectedTrx.match === 'Unmatched' ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'}`}>
                   <AlertTriangle className={`w-5 h-5 shrink-0 ${selectedTrx.match === 'Unmatched' ? 'text-amber-600' : 'text-red-600'}`} />
@@ -207,7 +332,6 @@ export default function DetailRekon() {
                 </div>
               )}
 
-              {/* Tabel Perbandingan Side-by-Side */}
               <div>
                 <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
                   <FileText className="w-4 h-4 text-indigo-500" /> Data Comparison
@@ -219,7 +343,6 @@ export default function DetailRekon() {
                     <div className="p-3 px-4 font-semibold text-sm text-emerald-700">Bank Statement</div>
                   </div>
                   
-                  {/* Baris: Waktu */}
                   <div className="grid grid-cols-2 border-b border-slate-100 text-sm">
                     <div className="p-3 px-4 border-r border-slate-100">
                       <span className="block text-xs text-slate-400 mb-0.5">Time recorded</span>
@@ -231,7 +354,6 @@ export default function DetailRekon() {
                     </div>
                   </div>
 
-                  {/* Baris: Merchant */}
                   <div className="grid grid-cols-2 border-b border-slate-100 text-sm">
                     <div className="p-3 px-4 border-r border-slate-100">
                       <span className="block text-xs text-slate-400 mb-0.5">Merchant / Terminal</span>
@@ -243,7 +365,6 @@ export default function DetailRekon() {
                     </div>
                   </div>
 
-                  {/* Baris: Reference */}
                   <div className="grid grid-cols-2 border-b border-slate-100 text-sm">
                     <div className="p-3 px-4 border-r border-slate-100">
                       <span className="block text-xs text-slate-400 mb-0.5">Reference No.</span>
@@ -255,7 +376,6 @@ export default function DetailRekon() {
                     </div>
                   </div>
 
-                  {/* Baris: Nominal Amount (Disorot merah jika beda) */}
                   <div className="grid grid-cols-2 text-sm bg-slate-50/50">
                     <div className="p-3 px-4 border-r border-slate-100">
                       <span className="block text-xs text-slate-400 mb-0.5">Amount</span>
@@ -272,10 +392,8 @@ export default function DetailRekon() {
                   </div>
                 </div>
               </div>
-
             </div>
 
-            {/* Drawer Footer (Tombol Aksi Resolusi) */}
             <div className="px-6 py-4 border-t border-slate-200 bg-slate-50">
               {selectedTrx.match === 'Matched' ? (
                 <div className="flex justify-end">

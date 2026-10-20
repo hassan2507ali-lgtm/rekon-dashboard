@@ -146,9 +146,7 @@ export default function Overview() {
               </div>
             )}
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-semibold shadow-sm hover:bg-indigo-700">
-            <Plus className="w-4 h-4" />New reconciliation
-          </button>
+          
         </div>
       </div>
 

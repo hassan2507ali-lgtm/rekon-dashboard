@@ -8,7 +8,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     { name: 'Overview', path: '/', icon: LayoutDashboard },
     { name: 'Reporting', path: '/reporting', icon: FileText },
     { name: 'Detail Rekon', path: '/detail-rekon', icon: FileSpreadsheet },
-    { name: 'Rekon Result', path: '/rekon-result', icon: CheckCircle2 },
+    
   ];
 
   return (

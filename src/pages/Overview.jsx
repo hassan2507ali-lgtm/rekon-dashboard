@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom'; 
 import { supabase } from '../supabaseClient';
 import { 
   Calendar, Layers, CheckCircle2, RefreshCcw, AlertTriangle, 
@@ -16,10 +17,9 @@ const dataCustomRange = [{ name: 'Jan', matched: 150000 }, { name: 'Feb', matche
 // --- DATA DUMMY GRAFIK BAR (MODUL) ---
 const modulToday = [{ name: 'ECT H0', aktif: 12, tidakAktif: 8 }, { name: 'ECO H0', aktif: 5, tidakAktif: 10 }, { name: 'ECO H1', aktif: 18, tidakAktif: 8 }];
 const modul7Days = [{ name: 'ECT H0', aktif: 85, tidakAktif: 20 }, { name: 'ECO H0', aktif: 40, tidakAktif: 45 }, { name: 'ECO H1', aktif: 120, tidakAktif: 30 }];
-const modul30Days = [{ name: 'ECT H0', aktif: 320, tidakAktif: 50 }, { name: 'ECO H0', aktif: 150, tidakAktif: 100 }, { name: 'ECO H1', aktif: 480, tidakAktif: 110 }];
+const modul30Days = [{ name: 'ECT H0', aktif: 320, tidakAktif: 50 }, { name: 'ECO H0', aktif: 150, tidakAktif: 100 }, { name: 'ECO H1', aktif: 480, turns: 110 }];
 const modulCustom = [{ name: 'ECT H0', aktif: 1200, tidakAktif: 150 }, { name: 'ECO H0', aktif: 800, tidakAktif: 300 }, { name: 'ECO H1', aktif: 1800, tidakAktif: 400 }];
 
-// --- DATA DUMMY TABEL STATUS MODUL ---
 const modulTableData = [
   { no: 1, modul: 'Modul 03', server: 'ECO H1', status: 'Aktif', sla: 'Tepat waktu', match: '18.240', unmatch: '820' },
   { no: 2, modul: 'Modul 11', server: 'ECO H1', status: 'Aktif', sla: 'Terlambat', match: '15.110', unmatch: '610' },
@@ -55,7 +55,6 @@ const topAnomalies = [
   { reason: 'Amount mismatch (Fee diff)', count: 20 },
 ];
 
-// --- DATA DUMMY: TOP FOCUS BUSINESS UNIT (HANYA 4 UNIT: WHO, REO, ECO, SBM) ---
 const topFocusData = [
   { id: 'TF-01', unit: 'WHO', trxName: 'Bilyet Giro Clearing', freq: 15400, unmatch: 45, server: 'ECO H1' },
   { id: 'TF-02', unit: 'ECO', trxName: 'Corporate Payroll', freq: 14200, unmatch: 8, server: 'ECO H1' },
@@ -72,6 +71,8 @@ const topFocusData = [
 ];
 
 export default function Overview() {
+  const navigate = useNavigate();
+
   const [activeFilter, setActiveFilter] = useState('Today');
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [startDate, setStartDate] = useState('');
@@ -85,18 +86,15 @@ export default function Overview() {
   
   const [feedTab, setFeedTab] = useState('All'); 
 
-  // State untuk Top Focus Business Unit
   const [selectedBU, setSelectedBU] = useState('Semua');
   const [previewUnit, setPreviewUnit] = useState(null); 
 
-  // --- STATE REAL DATA & SIMULATOR ---
   const [realData, setRealData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Simulator Control State
   const [isSimulating, setIsSimulating] = useState(false);
-  const [simInterval, setSimInterval] = useState(10000); // Default 10 detik
-  const [simulatedFeeds, setSimulatedFeeds] = useState([]); // Feed khusus dari data simulator
+  const [simInterval, setSimInterval] = useState(10000); 
+  const [simulatedFeeds, setSimulatedFeeds] = useState([]); 
 
   useEffect(() => {
     const fetchRealData = async () => {
@@ -130,7 +128,7 @@ export default function Overview() {
     fetchRealData();
   }, []);
 
-  // --- ENGINE SIMULATOR (CREATE DUMMY BERKALA) ---
+  // --- ENGINE SIMULATOR ---
   useEffect(() => {
     let intervalId;
     if (isSimulating) {
@@ -141,7 +139,6 @@ export default function Overview() {
         const rndServer = servers[Math.floor(Math.random() * servers.length)];
         const rndModule = modules[Math.floor(Math.random() * modules.length)];
         
-        // 80% Peluang Matched, 20% Unmatched
         const isMatch = Math.random() > 0.20 ? 'Matched' : 'Unmatched'; 
         const now = new Date();
         const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -155,17 +152,18 @@ export default function Overview() {
           time: timeStr
         };
 
-        // 1. Suntik Data Baru ke Kartu Metrik
         setRealData(prev => [newTrx, ...prev]);
 
-        // 2. Suntik Feed Notif/Alert Baru
+        // SUNTIKAN PAYLOAD: Tambah module & server agar diterima di Resolution
         const newFeed = {
           id: Date.now(),
           title: newTrxId,
           desc: isMatch === 'Matched' ? `Sukses: Data ${rndModule} berhasil ditarik & di-generate otomatis.` : `Unmatched! Selisih data terdeteksi pada ${rndModule}.`,
           category: isMatch === 'Matched' ? 'notif' : 'alert',
           color: isMatch === 'Matched' ? 'bg-emerald-500' : 'bg-rose-500',
-          time: timeStr
+          time: timeStr,
+          module: rndModule, // <--- Payload
+          server: rndServer  // <--- Payload
         };
         setSimulatedFeeds(prev => [newFeed, ...prev]);
 
@@ -174,13 +172,11 @@ export default function Overview() {
     return () => clearInterval(intervalId);
   }, [isSimulating, simInterval]);
 
-  // HITUNG METRIK SECARA REAL-TIME
   const stats = useMemo(() => {
     const total = realData.length;
     const matchedCount = realData.filter(d => d.match === 'Matched').length;
     const unmatchedCount = total - matchedCount;
     const matchRate = total > 0 ? ((matchedCount / total) * 100).toFixed(2) : '0.00';
-
     return { total, matchedCount, unmatchedCount, matchRate };
   }, [realData]);
 
@@ -225,20 +221,18 @@ export default function Overview() {
     return matchSearch && matchServer && matchStatus;
   });
 
-  // GABUNGAN FEED ASLI & FEED SIMULATOR
   const dynamicFeeds = useMemo(() => {
     const feeds = [];
     let idCounter = 1;
 
     filteredModulData.forEach(modul => {
       if (modul.status === 'Tidak aktif') {
-        feeds.push({ id: `f-${idCounter++}`, title: `${modul.modul} · ${modul.server}`, desc: 'Koneksi modul terputus / tidak aktif', category: 'alert', color: 'bg-rose-500', time: '09:00' });
+        feeds.push({ id: `f-${idCounter++}`, title: `${modul.modul} · ${modul.server}`, desc: 'Koneksi modul terputus / tidak aktif', category: 'alert', color: 'bg-rose-500', time: '09:00', module: modul.modul, server: modul.server });
       } else if (modul.sla === 'Terlambat') {
-        feeds.push({ id: `f-${idCounter++}`, title: `${modul.modul} · ${modul.server}`, desc: 'Proses melewati batas SLA', category: 'alert', color: 'bg-amber-500', time: '08:45' });
+        feeds.push({ id: `f-${idCounter++}`, title: `${modul.modul} · ${modul.server}`, desc: 'Proses melewati batas SLA', category: 'alert', color: 'bg-amber-500', time: '08:45', module: modul.modul, server: modul.server });
       }
     });
 
-    // Gabungkan dengan Simulated Feeds
     const mergedFeeds = [...simulatedFeeds, ...feeds];
 
     return mergedFeeds.sort((a, b) => {
@@ -263,7 +257,6 @@ export default function Overview() {
     return topFocusData.filter(d => d.unit === previewUnit).sort((a, b) => b.freq - a.freq).slice(0, 5);
   }, [previewUnit]);
 
-  // ANIMASI LOADING MENGGUNAKAN LOADER2
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-40 h-full">
@@ -276,7 +269,7 @@ export default function Overview() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-10">
       
-      {/* --- SIMULATOR CONTROL PANEL --- */}
+      {/* SIMULATOR CONTROL PANEL */}
       <div className="bg-slate-900 text-white p-4 rounded-xl shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-indigo-500/20 rounded-lg">
@@ -427,7 +420,7 @@ export default function Overview() {
           </div>
         </div>
         
-        {/* WIDGET LIVE FEED & ALERT */}
+        {/* WIDGET LIVE FEED & ALERT - BISA DIKLIK */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col h-[275px]">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
@@ -449,11 +442,18 @@ export default function Overview() {
           <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
             {displayFeeds.length > 0 ? (
               displayFeeds.map((feed) => (
-                <div key={feed.id} className="flex gap-3 items-start animate-in fade-in slide-in-from-left-2 duration-300">
+                <div 
+                  key={feed.id} 
+                  onClick={() => {
+                    // MENGIRIM DATA (STATE) SAAT PINDAH HALAMAN
+                    if (feed.category === 'alert') navigate('/resolution', { state: { alertDetail: feed } });
+                  }}
+                  className={`flex gap-3 items-start animate-in fade-in slide-in-from-left-2 duration-300 ${feed.category === 'alert' ? 'cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-lg transition-colors' : 'p-2 -mx-2'}`}
+                >
                   <div className={`w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 ${feed.color}`}></div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
-                      <p className="text-sm font-bold text-slate-800 leading-tight">{feed.title}</p>
+                      <p className={`text-sm font-bold leading-tight ${feed.category === 'alert' ? 'text-indigo-600' : 'text-slate-800'}`}>{feed.title}</p>
                       <span className="text-[10px] text-slate-400 font-semibold">{feed.time}</span>
                     </div>
                     <p className="text-xs text-slate-500 mt-1 leading-snug">{feed.desc}</p>
@@ -526,7 +526,6 @@ export default function Overview() {
                   <tr key={row.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-5 py-4 font-bold text-slate-400">{i + 1}</td>
                     <td className="px-5 py-4">
-                      {/* Badge Unit BISA DIKLIK untuk Pop-up Top 5 */}
                       <button 
                         onClick={() => setPreviewUnit(row.unit)}
                         title={`Lihat Top 5 Transaksi ${row.unit}`}

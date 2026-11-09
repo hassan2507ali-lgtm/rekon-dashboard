@@ -1,20 +1,19 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, FileText, FileSpreadsheet, CheckCircle2, Settings, X } from 'lucide-react';
+import { LayoutDashboard, FileText, FileSpreadsheet, Settings, X, AlertOctagon } from 'lucide-react';
 // Pastikan path logo sesuai dengan milikmu
 import logoMandiri from '../assets/mandiri-logo.png';
 
 export default function Sidebar({ isOpen, setIsOpen }) {
   const navItems = [
     { name: 'Overview', path: '/', icon: LayoutDashboard },
+    { name: 'Resolution', path: '/resolution', icon: AlertOctagon },
     { name: 'Reporting', path: '/reporting', icon: FileText },
     { name: 'Detail Rekon', path: '/detail-rekon', icon: FileSpreadsheet },
-    
   ];
 
   return (
     <>
       {/* --- OVERLAY GELAP UNTUK MOBILE --- */}
-      {/* Muncul di belakang sidebar saat dibuka di HP. Jika diklik, sidebar tertutup */}
       {isOpen && (
         <div 
           className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 md:hidden transition-opacity"
@@ -51,7 +50,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 key={item.path}
                 to={item.path}
                 end={item.path === '/'}
-                onClick={() => setIsOpen(false)} // Otomatis tutup sidebar saat menu diklik di HP
+                onClick={() => setIsOpen(false)}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
                     isActive
